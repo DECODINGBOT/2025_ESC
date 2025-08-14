@@ -11,10 +11,26 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  TextEditingController itemController = TextEditingController();
+  final TextEditingController itemController = TextEditingController();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // NEW: 비로그인 상태면 로그인 화면으로 보냄
+    final auth = context.read<AuthService>();
+    if (!auth.isLoggedIn) {
+      // build 이후에 네비게이션 수행
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) Navigator.pushReplacementNamed(context, '/login');
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthService>(); // CHANGED: 상태 감시
+    final greetingName = auth.username ?? '사용자';
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(120),
@@ -22,29 +38,26 @@ class _HomePageState extends State<HomePage> {
           backgroundColor: const Color(0xFF213555),
           elevation: 0,
           flexibleSpace: Padding(
-            padding: EdgeInsets.only(top: 40, left: 24, right: 24, bottom: 8),
+            padding: const EdgeInsets.only(top: 40, left: 24, right: 24, bottom: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    // CHANGED: 타이틀에 사용자명 노출
                     Text(
-                      "홈",
-                      style: TextStyle(
+                      "홈 · $greetingName님",
+                      style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
-                    Center(
-                      /// 가운데 부분 채우기
-                    ),
+                    const Center(), // 가운데 채우기용
                   ],
                 ),
-
                 const SizedBox(height: 12),
-
                 Container(
                   height: 40,
                   decoration: BoxDecoration(
@@ -53,20 +66,24 @@ class _HomePageState extends State<HomePage> {
                   ),
                   child: TextField(
                     controller: itemController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: "원하시는 물건을 검색해주세요.",
                       prefixIcon: Icon(Icons.search),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(vertical: 8),
                     ),
+                    onSubmitted: (q) {
+                      // TODO: 검색 API 연동 시 auth.token으로 호출
+                      // 예) ApiClient(token: auth.token).getJson('/api/items?query=$q')
+                    },
                   ),
-                )
+                ),
               ],
             ),
           ),
           actions: [
             TextButton(
-              child: Text(
+              child: const Text(
                 "로그아웃",
                 style: TextStyle(
                   fontSize: 16,
@@ -74,27 +91,26 @@ class _HomePageState extends State<HomePage> {
                   color: Colors.white,
                 ),
               ),
-              onPressed: () {
-                // 로그아웃
-                context.read<AuthService>().signOut();
-                // 로그인 페이지로 이동
-                /*
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginPage()),
-                );
-                */
-                Navigator.pushReplacementNamed(context, '/login');
+              onPressed: () async {
+                // CHANGED: 백엔드 로그아웃 + 토큰 삭제
+                await context.read<AuthService>().signOutBackend();
+                if (mounted) {
+                  Navigator.pushReplacementNamed(context, '/login');
+                }
               },
             ),
           ],
         ),
       ),
-      
+
       body: Padding(
-        padding: EdgeInsets.all(24),
+        padding: const EdgeInsets.all(24),
         child: SingleChildScrollView(
-          child: Text('body'),
+          child: Text(
+            auth.isLoggedIn
+                ? 'body (토큰 보유 중)'
+                : '로그인이 필요합니다. 잠시 후 로그인 화면으로 이동합니다.',
+          ),
         ),
       ),
 
@@ -110,35 +126,26 @@ class _HomePageState extends State<HomePage> {
               Navigator.pushReplacementNamed(context, '/home');
               break;
             case 1:
-              Navigator.pushReplacementNamed(context, '/login');
+              // TODO: 카테고리 화면 라우트로 교체
+              Navigator.pushReplacementNamed(context, '/home');
               break;
             case 2:
+              // TODO: 즐겨찾기 라우트로 교체 (인증 필요 시 auth.isLoggedIn 확인)
               Navigator.pushReplacementNamed(context, '/home');
               break;
             case 3:
+              // TODO: 마이페이지 라우트로 교체 (인증 필요 시 auth.isLoggedIn 확인)
               Navigator.pushReplacementNamed(context, '/home');
               break;
             default:
               Navigator.pushReplacementNamed(context, '/home');
           }
         },
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: '홈',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.menu),
-            label: '카테고리',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.star),
-            label: '즐겨찾기',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: '마이페이지',
-          ),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
+          BottomNavigationBarItem(icon: Icon(Icons.menu), label: '카테고리'),
+          BottomNavigationBarItem(icon: Icon(Icons.star), label: '즐겨찾기'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: '마이페이지'),
         ],
       ),
     );
