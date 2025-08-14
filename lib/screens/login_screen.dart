@@ -37,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             toolbarHeight: 120.0,
-            backgroundColor: const Color(0xFF213555)
+            backgroundColor: const Color(0xFF4A5A73)
           ),
         ),
         body: SingleChildScrollView(
@@ -97,7 +97,7 @@ class _LoginPageState extends State<LoginPage> {
       height: 54,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF213555),
+          backgroundColor: const Color(0xFF4A5A73),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
@@ -147,7 +147,7 @@ class _LoginPageState extends State<LoginPage> {
       height: 54,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF213555),
+          backgroundColor: const Color(0xFF4A5A73),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
