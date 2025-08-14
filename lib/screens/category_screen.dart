@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:sharing_items/screens/home_screen.dart';
 
 class CategoryScreen extends StatefulWidget {
   const CategoryScreen({super.key});
@@ -23,19 +24,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF4A5A73), // 상단 파란색
-        title: const Text("서울 성동구 사근동", style: TextStyle(color: Colors.white)),
-        centerTitle: true,
-        leading: Icon(Icons.menu, color: Colors.white),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.white),
-            onPressed: () {},
-          ),
-        ],
-        elevation: 0,
-      ),
+      appBar: CustomAppBar(title: "카테고리"),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -96,6 +85,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
           ],
         ),
       ),
+      bottomNavigationBar: CustomBottomNav(currentIndex: 1),
     );
   }
 }

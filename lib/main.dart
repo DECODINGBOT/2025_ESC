@@ -19,8 +19,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(fontFamily: 'NanumSquareRound'),
-      home: CategoryScreen(),
+      home: HomePage(),
       debugShowCheckedModeBanner: false,
+
+      routes: {
+        '/login': (_) => LoginPage(),
+        '/home': (_) => HomePage(),
+        '/category': (_) => CategoryScreen(),
+      },
     );
   }
 }
