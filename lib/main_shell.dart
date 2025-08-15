@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sharing_items/screens/category_screen.dart';
+import 'package:sharing_items/screens/search_screen.dart';
 import 'package:sharing_items/screens/favorites_screen.dart';
 import 'package:sharing_items/screens/home_screen.dart';
 import 'package:sharing_items/screens/mypage_screen.dart';
