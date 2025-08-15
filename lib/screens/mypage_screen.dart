@@ -1,6 +1,6 @@
+import 'dart:io'; // ✅ 로컬 파일 표시용
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:sharing_items/const/colors.dart';
 import 'package:sharing_items/screens/write_screen.dart';
 import 'package:sharing_items/screens/edit_myinfo_screen.dart';
 
@@ -12,21 +12,29 @@ class MyPageScreen extends StatefulWidget {
 }
 
 class _MyPageScreenState extends State<MyPageScreen> {
+  // 색상 팔레트
+  static const Color strong = Color(0xFF213555);
+  static const Color weak = Color(0xFF3E5879);
+  static const Color card = Color(0xFFD8C4B6);
+  static const Color bg = Color(0xFFF5EFE7);
 
   // 텍스트 스타일
   TextStyle get _titleStyle => const TextStyle(
+    fontFamily: 'NotoSans',
     fontSize: 24,
     fontWeight: FontWeight.w600,
     color: Colors.black,
   );
 
   TextStyle get _bodyStyle => const TextStyle(
+    fontFamily: 'NotoSans',
     fontSize: 16,
     fontWeight: FontWeight.w400,
     color: Colors.black,
   );
 
   TextStyle get _detailStyle => const TextStyle(
+    fontFamily: 'NotoSans',
     fontSize: 12,
     fontWeight: FontWeight.w300,
     color: Colors.black,
@@ -38,8 +46,10 @@ class _MyPageScreenState extends State<MyPageScreen> {
   DateTime joinDate = DateTime(2025, 8, 14);
   String address = '주소';
 
-  // 임시 데이터: 내가 쓴 글/대여내역
-  final bool hasMyPosts = false;
+  // 내가 쓴 글 (WriteScreen에서 돌아온 내용을 쌓아 보여줌)
+  final List<MyPost> myPosts = [];
+
+  // 임시 데이터: 대여내역
   final List<RentalItem> myRentals = [];
 
   String _dateText(DateTime d) =>
@@ -48,16 +58,16 @@ class _MyPageScreenState extends State<MyPageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        //backgroundColor: strong,
-        backgroundColor: pointColorWeak,
+        backgroundColor: const Color(0xFF4A5A73),
         elevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
         title: const Text(
           '마이페이지',
           style: TextStyle(
+            fontFamily: 'NotoSans',
             fontSize: 28,
             fontWeight: FontWeight.w700,
             color: Colors.white,
@@ -70,10 +80,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "내 정보",
-                style: TextStyle(color: pointColorStrong, fontSize: 24, fontWeight: FontWeight.w700),
-              ),
+              const _SectionHeader(title: '내 정보'),
               const SizedBox(height: 8),
               _buildMyInfoCard(
                 context,
@@ -93,6 +100,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                       const Text(
                         '작성하기',
                         style: TextStyle(
+                          fontFamily: 'NotoSans',
                           fontSize: 16,
                           color: Colors.black,
                         ),
@@ -110,7 +118,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
               ),
               const SizedBox(height: 8),
               _MyPostsArea(
-                hasPosts: hasMyPosts,
+                posts: myPosts,
                 bodyStyle: _bodyStyle,
                 detailStyle: _detailStyle,
               ),
@@ -143,8 +151,9 @@ class _MyPageScreenState extends State<MyPageScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: widgetbackgroundColor,
+        color: bg,
         borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: weak.withOpacity(0.25)),
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -152,23 +161,38 @@ class _MyPageScreenState extends State<MyPageScreen> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: profileImageUrl == null
-                ? Container(
-                    width: 64,
-                    height: 64,
-                    color: Colors.white,
-                    child: const Icon(
-                      Icons.person,
-                      size: 40,
-                      color:pointColorStrong,
-                    ),
-                  )
-                : Image.network(
-                    profileImageUrl,
-                    width: 64,
-                    height: 64,
-                    fit: BoxFit.cover,
+            child: () {
+              // ✅ 로컬/네트워크 모두 지원
+              if (profileImageUrl == null || profileImageUrl!.isEmpty) {
+                return Container(
+                  width: 64,
+                  height: 64,
+                  color: Colors.white,
+                  child: const Icon(
+                    Icons.person,
+                    size: 40,
+                    color: Colors.black,
                   ),
+                );
+              }
+              final url = profileImageUrl!;
+              if (url.startsWith('http')) {
+                return Image.network(
+                  url,
+                  width: 64,
+                  height: 64,
+                  fit: BoxFit.cover,
+                );
+              } else {
+                final localPath = url.replaceFirst('file://', '');
+                return Image.file(
+                  File(localPath),
+                  width: 64,
+                  height: 64,
+                  fit: BoxFit.cover,
+                );
+              }
+            }(),
           ),
           const SizedBox(width: 16),
 
@@ -199,14 +223,15 @@ class _MyPageScreenState extends State<MyPageScreen> {
             child: OutlinedButton(
               onPressed: () => _onEditTapped(context),
               style: OutlinedButton.styleFrom(
-                backgroundColor:widgetbackgroundColor,
-                foregroundColor:pointColorStrong,
-                side: const BorderSide(color: pointColorStrong, width: 1),
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black,
+                side: const BorderSide(color: Colors.black, width: 1),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 textStyle: const TextStyle(
+                  fontFamily: 'NotoSans',
                   fontSize: 14,
                 ),
               ),
@@ -227,10 +252,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
           initialUserId: userId,
           initialJoinDate: joinDate,
           initialAddress: address,
-          // 필요 시 아래도 전달
-          // initialDetailAddress: detailAddress,
-          // initialPhone: phone,
-          // initialAbout: about,
           initialProfileImageUrl: profileImageUrl,
         ),
       ),
@@ -257,11 +278,28 @@ class _MyPageScreenState extends State<MyPageScreen> {
     }
   }
 
-  void _onWriteTapped(BuildContext context) {
-    Navigator.push(
+  Future<void> _onWriteTapped(BuildContext context) async {
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const WriteScreen()),
     );
+
+    if (!mounted) return;
+
+    // WriteScreen에서 Map 형태로 결과를 돌려준다고 가정
+    if (result is Map) {
+      try {
+        final post = MyPost.fromMap(result);
+        setState(() {
+          myPosts.insert(0, post); // 최신 글을 위로
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('글이 등록되었습니다.')));
+      } catch (_) {
+        // 결과 형식이 다를 경우 무시
+      }
+    }
   }
 }
 
@@ -281,9 +319,10 @@ class _SectionHeader extends StatelessWidget {
           child: Text(
             title,
             style: const TextStyle(
+              fontFamily: 'NotoSans',
               fontSize: 24,
               fontWeight: FontWeight.w700,
-              color: pointColorStrong,
+              color: Colors.black,
             ),
           ),
         ),
@@ -295,55 +334,63 @@ class _SectionHeader extends StatelessWidget {
 
 class _MyPostsArea extends StatelessWidget {
   const _MyPostsArea({
-    required this.hasPosts,
+    required this.posts,
     required this.bodyStyle,
     required this.detailStyle,
   });
 
-  final bool hasPosts;
+  final List<MyPost> posts;
   final TextStyle bodyStyle;
   final TextStyle detailStyle;
 
   @override
   Widget build(BuildContext context) {
-    if (!hasPosts) {
+    if (posts.isEmpty) {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         decoration: BoxDecoration(
-          color: widgetbackgroundColor,
+          color: _MyPageScreenState.bg,
           borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: _MyPageScreenState.weak.withOpacity(0.2)),
         ),
         child: const Text(
           '아직 작성한 글이 없습니다.',
           style: TextStyle(
+            fontFamily: 'NotoSans',
             fontSize: 16,
-            color: pointColorStrong,
+            color: _MyPageScreenState.strong,
           ),
         ),
       );
     }
 
-    final items = List.generate(3, (i) => '내 글 제목 ${i + 1}');
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: _MyPageScreenState.weak.withOpacity(0.2)),
       ),
       child: ListView.separated(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        itemCount: items.length,
+        itemCount: posts.length,
         separatorBuilder: (_, __) => const Divider(height: 1),
         itemBuilder: (context, index) {
+          final p = posts[index];
           return ListTile(
-            title: Text(items[index], style: bodyStyle),
-            subtitle: Text('상세 보기', style: detailStyle),
+            title: Text(p.title, style: bodyStyle),
+            subtitle: Text(
+              '등록일 ${p.createdAt.year}.${p.createdAt.month.toString().padLeft(2, '0')}.${p.createdAt.day.toString().padLeft(2, '0')}',
+              style: detailStyle,
+            ),
             trailing: const Icon(
               Icons.chevron_right,
-              color: pointColorStrong,
+              color: _MyPageScreenState.weak,
             ),
-            onTap: () {},
+            onTap: () {
+              // TODO: 상세 페이지로 이동하고 싶다면 여기 연결
+            },
           );
         },
       ),
@@ -359,9 +406,9 @@ class _RentalTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: widgetbackgroundColor,
+        color: _MyPageScreenState.bg,
         borderRadius: BorderRadius.circular(18),
-        // border: Border.all(color: _MyPageScreenState.weak.withOpacity(0.2)),
+        border: Border.all(color: _MyPageScreenState.weak.withOpacity(0.2)),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -374,21 +421,19 @@ class _RentalTile extends StatelessWidget {
             child: Icon(
               item.thumbnail,
               size: 32,
-              color: pointColorWeak,
+              color: _MyPageScreenState.weak,
             ),
           ),
         ),
-        title:
-            const SizedBox.shrink() == null // just to keep const warning away
-            ? null
-            : Text(
-                item.title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: pointColorStrong,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+        title: Text(
+          item.title,
+          style: const TextStyle(
+            fontFamily: 'NotoSans',
+            fontSize: 16,
+            color: _MyPageScreenState.strong,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -396,6 +441,7 @@ class _RentalTile extends StatelessWidget {
             Text(
               '대여기간  ${item.period}',
               style: const TextStyle(
+                fontFamily: 'NotoSans',
                 fontSize: 12,
                 color: Colors.black,
               ),
@@ -404,6 +450,7 @@ class _RentalTile extends StatelessWidget {
             Text(
               '가격  ${item.price}',
               style: const TextStyle(
+                fontFamily: 'NotoSans',
                 fontSize: 12,
                 color: Colors.black,
               ),
@@ -428,4 +475,21 @@ class RentalItem {
     required this.price,
     required this.thumbnail,
   });
+}
+
+// ===== 내가 쓴 글 모델 =====
+class MyPost {
+  final String title;
+  final DateTime createdAt;
+
+  MyPost({required this.title, required this.createdAt});
+
+  factory MyPost.fromMap(Map data) {
+    return MyPost(
+      title: (data['title'] as String?) ?? '제목 없음',
+      createdAt:
+          DateTime.tryParse((data['createdAt'] as String?) ?? '') ??
+          DateTime.now(),
+    );
+  }
 }
