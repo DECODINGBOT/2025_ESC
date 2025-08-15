@@ -2,6 +2,7 @@ import 'dart:io'; // NEW
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart'; // NEW
+import 'package:sharing_items/screens/detail_screen.dart'; // 경로 맞게
 
 class WriteScreen extends StatefulWidget {
   const WriteScreen({super.key});
