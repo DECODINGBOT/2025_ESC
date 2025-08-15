@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sharing_items/const/colors.dart';
+import 'package:sharing_items/screens/write_screen.dart';
 import 'package:sharing_items/src/custom/item_info.dart';
 import 'package:sharing_items/src/service/favorites_provider.dart';
 
@@ -169,10 +170,28 @@ class _SearchScreenState extends State<SearchScreen>
               child: _resultList(results, fav),
             ),
           ),
-
+           Positioned(right: 20, bottom: 20, child: _writeButton()),
           // 상단 카테고리 패널(접혔을 때는 화살표 영역만, 펼치면 그 아래 Grid가 오버레이)
           Positioned(top: 0, left: 0, right: 0, child: _categoryTab()),
         ],
+      ),
+    );
+  }
+
+  Widget _writeButton() {
+    return IconButton(
+      onPressed: () {
+        Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>WriteScreen(), // 이동할 페이지
+      ),
+    );
+      },
+      icon: Icon(Icons.add_rounded, color: Colors.white, size: 35,),
+      style: IconButton.styleFrom(
+        backgroundColor: pointColorWeak, // 원형 배경 색
+        shape: CircleBorder(),
       ),
     );
   }
