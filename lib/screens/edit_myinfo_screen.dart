@@ -70,7 +70,7 @@ class _EditMyInfoScreenState extends State<EditMyInfoScreen> {
 
   InputDecoration _input(String hint) => InputDecoration(
     hintText: hint,
-    hintStyle: const TextStyle(fontFamily: 'NotoSans', color: Colors.black45),
+    hintStyle: const TextStyle(color: Colors.black45),
     filled: true,
     fillColor: inputBg,
     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
@@ -85,7 +85,6 @@ class _EditMyInfoScreenState extends State<EditMyInfoScreen> {
     child: Text(
       text,
       style: const TextStyle(
-        fontFamily: 'NotoSans',
         fontSize: 20,
         fontWeight: FontWeight.w700,
         color: Colors.black,
@@ -123,7 +122,6 @@ class _EditMyInfoScreenState extends State<EditMyInfoScreen> {
         title: const Text(
           '내 정보 수정',
           style: TextStyle(
-            fontFamily: 'NotoSans',
             fontSize: 24,
             fontWeight: FontWeight.w700,
             color: Colors.white,
@@ -174,7 +172,6 @@ class _EditMyInfoScreenState extends State<EditMyInfoScreen> {
                       child: Text(
                         '프로필 사진을 탭하여 변경할 수 있어요.',
                         style: TextStyle(
-                          fontFamily: 'NotoSans',
                           fontSize: 12,
                           color: Colors.black54,
                         ),
@@ -205,7 +202,6 @@ class _EditMyInfoScreenState extends State<EditMyInfoScreen> {
                   child: Text(
                     _dateText(_joinDate), // ← 초기값 표시됨
                     style: const TextStyle(
-                      fontFamily: 'NotoSans',
                       color: Colors.black87,
                     ),
                   ),
@@ -255,7 +251,6 @@ class _EditMyInfoScreenState extends State<EditMyInfoScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       textStyle: const TextStyle(
-                        fontFamily: 'NotoSans',
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),

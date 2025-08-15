@@ -106,4 +106,12 @@ class _ItemInfoState extends State<ItemInfo> {
       ),
     );
   }
+
+  @override
+  void didUpdateWidget(covariant ItemInfo oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isLike != widget.isLike) {
+      isLiked = widget.isLike;
+    }
+  }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:sharing_items/src/service/auth_service.dart';
+import 'package:sharing_items/src/service/favorites_provider.dart';
 import 'package:sharing_items/src/service/theme_service.dart';
 import 'package:sharing_items/screens/favorites_screen.dart'; // FavoritesProvider가 여기 있다면 유지
 import 'package:sharing_items/screens/detail_screen.dart'; // ✅ DetailScreen/DetailItem 경로 확인

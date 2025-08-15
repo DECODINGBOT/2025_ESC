@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:sharing_items/const/colors.dart';
 import 'package:sharing_items/screens/write_screen.dart';
 import 'package:sharing_items/screens/edit_myinfo_screen.dart';
 
@@ -11,29 +12,21 @@ class MyPageScreen extends StatefulWidget {
 }
 
 class _MyPageScreenState extends State<MyPageScreen> {
-  // 색상 팔레트
-  static const Color strong = Color(0xFF213555);
-  static const Color weak = Color(0xFF3E5879);
-  static const Color card = Color(0xFFD8C4B6);
-  static const Color bg = Color(0xFFF5EFE7);
 
   // 텍스트 스타일
   TextStyle get _titleStyle => const TextStyle(
-    fontFamily: 'NotoSans',
     fontSize: 24,
     fontWeight: FontWeight.w600,
     color: Colors.black,
   );
 
   TextStyle get _bodyStyle => const TextStyle(
-    fontFamily: 'NotoSans',
     fontSize: 16,
     fontWeight: FontWeight.w400,
     color: Colors.black,
   );
 
   TextStyle get _detailStyle => const TextStyle(
-    fontFamily: 'NotoSans',
     fontSize: 12,
     fontWeight: FontWeight.w300,
     color: Colors.black,
@@ -55,17 +48,16 @@ class _MyPageScreenState extends State<MyPageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         //backgroundColor: strong,
-        backgroundColor: const Color(0xFF4A5A73),
+        backgroundColor: pointColorWeak,
         elevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
         title: const Text(
           '마이페이지',
           style: TextStyle(
-            fontFamily: 'NotoSans',
             fontSize: 28,
             fontWeight: FontWeight.w700,
             color: Colors.white,
@@ -78,7 +70,10 @@ class _MyPageScreenState extends State<MyPageScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const _SectionHeader(title: '내 정보'),
+              Text(
+                "내 정보",
+                style: TextStyle(color: pointColorStrong, fontSize: 24, fontWeight: FontWeight.w700),
+              ),
               const SizedBox(height: 8),
               _buildMyInfoCard(
                 context,
@@ -98,7 +93,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
                       const Text(
                         '작성하기',
                         style: TextStyle(
-                          fontFamily: 'NotoSans',
                           fontSize: 16,
                           color: Colors.black,
                         ),
@@ -149,9 +143,8 @@ class _MyPageScreenState extends State<MyPageScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: bg,
+        color: widgetbackgroundColor,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: weak.withOpacity(0.25)),
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -167,7 +160,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                     child: const Icon(
                       Icons.person,
                       size: 40,
-                      color: Colors.black,
+                      color:pointColorStrong,
                     ),
                   )
                 : Image.network(
@@ -206,15 +199,14 @@ class _MyPageScreenState extends State<MyPageScreen> {
             child: OutlinedButton(
               onPressed: () => _onEditTapped(context),
               style: OutlinedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
-                side: const BorderSide(color: Colors.black, width: 1),
+                backgroundColor:widgetbackgroundColor,
+                foregroundColor:pointColorStrong,
+                side: const BorderSide(color: pointColorStrong, width: 1),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(18),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 textStyle: const TextStyle(
-                  fontFamily: 'NotoSans',
                   fontSize: 14,
                 ),
               ),
@@ -289,10 +281,9 @@ class _SectionHeader extends StatelessWidget {
           child: Text(
             title,
             style: const TextStyle(
-              fontFamily: 'NotoSans',
               fontSize: 24,
               fontWeight: FontWeight.w700,
-              color: Colors.black,
+              color: pointColorStrong,
             ),
           ),
         ),
@@ -320,16 +311,14 @@ class _MyPostsArea extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         decoration: BoxDecoration(
-          color: _MyPageScreenState.bg,
+          color: widgetbackgroundColor,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: _MyPageScreenState.weak.withOpacity(0.2)),
         ),
         child: const Text(
           '아직 작성한 글이 없습니다.',
           style: TextStyle(
-            fontFamily: 'NotoSans',
             fontSize: 16,
-            color: _MyPageScreenState.strong,
+            color: pointColorStrong,
           ),
         ),
       );
@@ -340,7 +329,6 @@ class _MyPostsArea extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _MyPageScreenState.weak.withOpacity(0.2)),
       ),
       child: ListView.separated(
         shrinkWrap: true,
@@ -353,7 +341,7 @@ class _MyPostsArea extends StatelessWidget {
             subtitle: Text('상세 보기', style: detailStyle),
             trailing: const Icon(
               Icons.chevron_right,
-              color: _MyPageScreenState.weak,
+              color: pointColorStrong,
             ),
             onTap: () {},
           );
@@ -371,9 +359,9 @@ class _RentalTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: _MyPageScreenState.bg,
+        color: widgetbackgroundColor,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _MyPageScreenState.weak.withOpacity(0.2)),
+        // border: Border.all(color: _MyPageScreenState.weak.withOpacity(0.2)),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -386,20 +374,18 @@ class _RentalTile extends StatelessWidget {
             child: Icon(
               item.thumbnail,
               size: 32,
-              color: _MyPageScreenState.weak,
+              color: pointColorWeak,
             ),
           ),
         ),
         title:
-            const SizedBox.shrink() ==
-                null // just to keep const warning away
+            const SizedBox.shrink() == null // just to keep const warning away
             ? null
             : Text(
                 item.title,
                 style: const TextStyle(
-                  fontFamily: 'NotoSans',
                   fontSize: 16,
-                  color: _MyPageScreenState.strong,
+                  color: pointColorStrong,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -410,7 +396,6 @@ class _RentalTile extends StatelessWidget {
             Text(
               '대여기간  ${item.period}',
               style: const TextStyle(
-                fontFamily: 'NotoSans',
                 fontSize: 12,
                 color: Colors.black,
               ),
@@ -419,7 +404,6 @@ class _RentalTile extends StatelessWidget {
             Text(
               '가격  ${item.price}',
               style: const TextStyle(
-                fontFamily: 'NotoSans',
                 fontSize: 12,
                 color: Colors.black,
               ),

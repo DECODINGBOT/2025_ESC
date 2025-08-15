@@ -36,7 +36,7 @@ class _WriteScreenState extends State<WriteScreen> {
   // ---- helpers ----
   InputDecoration _boxInput(String hint) => InputDecoration(
     hintText: hint,
-    hintStyle: const TextStyle(fontFamily: 'NotoSans', color: Colors.black54),
+    hintStyle: const TextStyle(color: Colors.black54),
     filled: true,
     fillColor: const Color(0xFFF5EFE7),
     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
@@ -51,7 +51,6 @@ class _WriteScreenState extends State<WriteScreen> {
     child: Text(
       text,
       style: const TextStyle(
-        fontFamily: 'NotoSans',
         fontSize: 20,
         fontWeight: FontWeight.w600,
         color: Colors.black,
@@ -221,7 +220,6 @@ class _WriteScreenState extends State<WriteScreen> {
         title: const Text(
           '글쓰기',
           style: TextStyle(
-            fontFamily: 'NotoSans',
             fontSize: 28,
             fontWeight: FontWeight.w700,
             color: Colors.white,
@@ -240,7 +238,6 @@ class _WriteScreenState extends State<WriteScreen> {
                 Text(
                   '사진',
                   style: const TextStyle(
-                    fontFamily: 'NotoSans',
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
                     color: Colors.black,
@@ -315,7 +312,6 @@ class _WriteScreenState extends State<WriteScreen> {
                 const Text(
                   '최소 1장 이상의 사진을 등록해 주세요.',
                   style: TextStyle(
-                    fontFamily: 'NotoSans',
                     fontSize: 12,
                     color: Colors.black54,
                   ),
@@ -397,7 +393,6 @@ class _WriteScreenState extends State<WriteScreen> {
                               Text(
                                 _dateText(_startDate, '시작일 선택'),
                                 style: const TextStyle(
-                                  fontFamily: 'NotoSans',
                                   color: Colors.black87,
                                 ),
                               ),
@@ -436,7 +431,6 @@ class _WriteScreenState extends State<WriteScreen> {
                               Text(
                                 _dateText(_endDate, '종료일 선택'),
                                 style: const TextStyle(
-                                  fontFamily: 'NotoSans',
                                   color: Colors.black87,
                                 ),
                               ),
@@ -459,7 +453,6 @@ class _WriteScreenState extends State<WriteScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       textStyle: const TextStyle(
-                        fontFamily: 'NotoSans',
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
