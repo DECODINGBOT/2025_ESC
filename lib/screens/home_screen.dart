@@ -21,7 +21,7 @@ class _HomePageState extends State<HomePage> {
         padding: EdgeInsets.all(24),
         child: SingleChildScrollView(child: Text('body')),
       ),
-      bottomNavigationBar: CustomBottomNav(currentIndex: 1),
+      bottomNavigationBar: CustomBottomNav(currentIndex: 0),
     );
   }
 }
@@ -137,7 +137,7 @@ class CustomBottomNav extends StatelessWidget {
             Navigator.pushReplacementNamed(context, '/home');
             break;
           case 1:
-            Navigator.pushReplacementNamed(context, '/category');
+            Navigator.pushReplacementNamed(context, '/search');
             break;
           case 2:
             Navigator.pushReplacementNamed(context, '/favorites');

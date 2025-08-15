@@ -2,6 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sharing_items/screens/category_screen.dart';
+import 'package:sharing_items/screens/favorites_screen.dart';
+import 'package:sharing_items/screens/search_screen.dart';
 import 'package:sharing_items/src/service/auth_service.dart';
 import 'package:sharing_items/src/service/theme_service.dart';
 
@@ -19,8 +21,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(fontFamily: 'NanumSquareRound'),
-      home: CategoryScreen(),
+      home: HomePage(),
       debugShowCheckedModeBanner: false,
+      routes: {
+        '/login': (_) => LoginPage(),
+        '/home': (_) => HomePage(),
+        '/search': (_) => SearchScreen(),
+        '/favorites': (_) => FavoritesPage(),
+      },
     );
   }
 }
