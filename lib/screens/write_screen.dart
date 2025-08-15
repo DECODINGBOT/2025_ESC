@@ -311,10 +311,7 @@ class _WriteScreenState extends State<WriteScreen> {
                 const SizedBox(height: 8),
                 const Text(
                   '최소 1장 이상의 사진을 등록해 주세요.',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.black54,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.black54),
                 ),
 
                 // 상품명
@@ -392,9 +389,7 @@ class _WriteScreenState extends State<WriteScreen> {
                               const SizedBox(width: 8),
                               Text(
                                 _dateText(_startDate, '시작일 선택'),
-                                style: const TextStyle(
-                                  color: Colors.black87,
-                                ),
+                                style: const TextStyle(color: Colors.black87),
                               ),
                             ],
                           ),
@@ -430,9 +425,7 @@ class _WriteScreenState extends State<WriteScreen> {
                               const SizedBox(width: 8),
                               Text(
                                 _dateText(_endDate, '종료일 선택'),
-                                style: const TextStyle(
-                                  color: Colors.black87,
-                                ),
+                                style: const TextStyle(color: Colors.black87),
                               ),
                             ],
                           ),
@@ -471,23 +464,4 @@ class _WriteScreenState extends State<WriteScreen> {
       ),
     );
   }
-}
-
-class ImagePicker {
-  Future pickImage({
-    required source,
-    required int imageQuality,
-    required int maxWidth,
-    required int maxHeight,
-  }) async {}
-
-  Future pickMultiImage({
-    required int imageQuality,
-    required int maxWidth,
-    required int maxHeight,
-  }) async {}
-}
-
-class ImageSource {
-  static var camera;
 }
