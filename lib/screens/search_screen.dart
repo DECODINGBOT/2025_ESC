@@ -1,6 +1,9 @@
+// lib/screens/search_screen.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sharing_items/const/colors.dart';
 import 'package:sharing_items/src/custom/item_info.dart';
+import 'package:sharing_items/src/service/favorites_provider.dart';
 
 class SearchScreen extends StatefulWidget {
   final TextEditingController? searchController;
@@ -31,35 +34,6 @@ class _SearchScreenState extends State<SearchScreen>
   TextEditingController get _controller =>
       widget.searchController ?? _internalController;
 
-  final List<Map<String, dynamic>> _allItems = [
-    {
-      "category": "자동차용품",
-      "title": "블랙박스 새상품",
-      "location": "서울 강남구",
-      "price": 85000,
-    },
-    {
-      "category": "전자/가전제품",
-      "title": "아이패드 9세대 64GB",
-      "location": "서울 송파구",
-      "price": 290000,
-    },
-    {
-      "category": "의류/신발",
-      "title": "나이키 에어포스 270",
-      "location": "서울 마포구",
-      "price": 70000,
-    },
-    {
-      "category": "자동차용품",
-      "title": "차량용 핸드폰 거치대",
-      "location": "서울 동작구",
-      "price": 10000,
-    },
-  ];
-
-  late List<Map<String, dynamic>> _results;
-
   // 카테고리 패널 상태/애니메이션 & 선택 상태
   bool _showCategoryPanel = false;
   late final AnimationController _arrowCtrl;
@@ -69,8 +43,7 @@ class _SearchScreenState extends State<SearchScreen>
   void initState() {
     super.initState();
     _internalController = TextEditingController();
-    _results = List<Map<String, dynamic>>.from(_allItems);
-    _controller.addListener(_applyFilters);
+    _controller.addListener(() => setState(() {})); // 검색어 변경 시 재빌드
 
     _arrowCtrl = AnimationController(
       vsync: this,
@@ -80,28 +53,12 @@ class _SearchScreenState extends State<SearchScreen>
 
   @override
   void dispose() {
-    _controller.removeListener(_applyFilters);
+    _controller.removeListener(() {});
     if (widget.searchController == null) {
       _internalController.dispose();
     }
     _arrowCtrl.dispose();
     super.dispose();
-  }
-
-  void _applyFilters() {
-    final q = _controller.text.trim().toLowerCase();
-    setState(() {
-      _results = _allItems.where((item) {
-        final title = (item['title'] as String).toLowerCase();
-        final category = item['category'] as String;
-
-        final matchQuery = q.isEmpty || title.contains(q);
-        final matchCategory =
-            _selectedCategories.isEmpty || _selectedCategories.contains(category);
-
-        return matchQuery && matchCategory;
-      }).toList();
-    });
   }
 
   void _clearSearch() => _controller.clear();
@@ -123,11 +80,30 @@ class _SearchScreenState extends State<SearchScreen>
         _selectedCategories.add(label);
       }
     });
-    _applyFilters();
+  }
+
+  // provider의 전체 데이터에서 현재 조건으로 필터링
+  List<Map<String, dynamic>> _filtered(
+      List<Map<String, dynamic>> allItems) {
+    final q = _controller.text.trim().toLowerCase();
+    return allItems.where((item) {
+      final title = (item['title'] as String).toLowerCase();
+      final category = item['category'] as String;
+
+      final matchQuery = q.isEmpty || title.contains(q);
+      final matchCategory =
+          _selectedCategories.isEmpty || _selectedCategories.contains(category);
+
+      return matchQuery && matchCategory;
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Provider 감시: 즐겨찾기 변경 시 자동 재빌드
+    final fav = context.watch<FavoritesProvider>();
+    final results = _filtered(fav.all);
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(128),
@@ -152,7 +128,6 @@ class _SearchScreenState extends State<SearchScreen>
                           color: Colors.white,
                         ),
                       ),
-                      // 가운데 채움용
                       SizedBox.shrink(),
                     ],
                   ),
@@ -178,7 +153,8 @@ class _SearchScreenState extends State<SearchScreen>
                               )
                             : null,
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 8),
                       ),
                       onSubmitted: (_) => FocusScope.of(context).unfocus(),
                     ),
@@ -196,7 +172,7 @@ class _SearchScreenState extends State<SearchScreen>
             top: _collapsedPanelHeight,
             child: IgnorePointer(
               ignoring: _showCategoryPanel, // 패널 열리면 리스트 터치 막기
-              child: _resultList(),
+              child: _resultList(results, fav),
             ),
           ),
 
@@ -207,28 +183,63 @@ class _SearchScreenState extends State<SearchScreen>
     );
   }
 
-  // 결과 리스트(Expanded/Column 없이 단일 ListView)
-  Widget _resultList() {
-    if (_results.isEmpty) {
-      return const Center(
-        child: Text("검색 결과가 없어요.", style: TextStyle(fontSize: 16)),
-      );
-    }
-    return ListView.builder(
-      padding: const EdgeInsets.only(top: 0),
-      itemCount: _results.length,
-      itemBuilder: (context, index) {
-        final item = _results[index];
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: ItemInfo(
-            category: item['category'] as String,
-            title: item['title'] as String,
-            location: item['location'] as String,
-            price: item['price'] as int,
+  Widget _summaryBar(int count) {
+    final selectedText =
+        _selectedCategories.isEmpty ? "전체" : _selectedCategories.join(", ");
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          child: Text(
+            "검색 결과 $count개 · 카테고리: $selectedText",
+            style: const TextStyle(fontSize: 14, color: Colors.grey),
           ),
-        );
-      },
+        ),
+        const Divider(height: 1),
+      ],
+    );
+  }
+
+  // 결과 리스트(요약바 + 아이템들). 즐겨찾기 표시는 Provider 기준.
+  Widget _resultList(List<Map<String, dynamic>> results, FavoritesProvider fav) {
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(child: _summaryBar(results.length)),
+        if (results.isEmpty)
+          const SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(
+              child: Text("검색 결과가 없어요.", style: TextStyle(fontSize: 16)),
+            ),
+          )
+        else
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final m = results[index];
+                final id = m['id'] as String;
+
+                return Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: ItemInfo(
+                    key: ValueKey(id),
+                    category: m['category'] as String,
+                    title: m['title'] as String,
+                    location: m['location'] as String,
+                    price: m['price'] as int,
+                    isLike: fav.isFavoriteById(id),
+                    onLikeChanged: (_) =>
+                        context.read<FavoritesProvider>().toggleById(id), // 토글
+                  ),
+                );
+              },
+              childCount: results.length,
+            ),
+          ),
+      ],
     );
   }
 
@@ -238,11 +249,11 @@ class _SearchScreenState extends State<SearchScreen>
       decoration: BoxDecoration(
         color: pointColorWeak,
         boxShadow: const [
-          BoxShadow(blurRadius: 6, color: Colors.black12), // 살짝 떠 보이게
+          BoxShadow(blurRadius: 6, color: Colors.black12),
         ],
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min, // 내용 높이만 차지
+        mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
             height: _collapsedPanelHeight,
@@ -260,8 +271,6 @@ class _SearchScreenState extends State<SearchScreen>
               ),
             ),
           ),
-
-          // 펼쳐지는 카테고리 Grid (오버레이로 리스트 위에 내려옴)
           ClipRect(
             child: AnimatedSize(
               duration: const Duration(milliseconds: 200),
@@ -283,7 +292,8 @@ class _SearchScreenState extends State<SearchScreen>
                         itemBuilder: (context, index) {
                           final category = categories[index];
                           final label = category['label'] as String;
-                          final selected = _selectedCategories.contains(label);
+                          final selected =
+                              _selectedCategories.contains(label);
 
                           return Card(
                             color: selected

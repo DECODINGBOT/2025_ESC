@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:sharing_items/main_shell.dart';
 import 'package:sharing_items/screens/favorites_screen.dart';
 import 'package:sharing_items/src/service/auth_service.dart';
+import 'package:sharing_items/src/service/favorites_provider.dart';
 import 'package:sharing_items/src/service/theme_service.dart';
 
 import 'package:sharing_items/screens/login_screen.dart';
