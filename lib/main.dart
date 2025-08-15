@@ -1,12 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sharing_items/main_shell.dart';
-import 'package:sharing_items/screens/favorites_screen.dart';
+
 import 'package:sharing_items/src/service/auth_service.dart';
 import 'package:sharing_items/src/service/theme_service.dart';
-
-import 'package:sharing_items/screens/login_screen.dart';
+import 'package:sharing_items/screens/favorites_screen.dart'; // FavoritesProvider가 여기 있다면 유지
+import 'package:sharing_items/screens/detail_screen.dart'; // ✅ DetailScreen/DetailItem 경로 확인
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,9 +13,9 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => AuthService()),
-        ChangeNotifierProvider(create: (context) => ThemeService()),
-        ChangeNotifierProvider(create: (context) => FavoritesProvider()),
+        ChangeNotifierProvider(create: (_) => AuthService()),
+        ChangeNotifierProvider(create: (_) => ThemeService()),
+        ChangeNotifierProvider(create: (_) => FavoritesProvider()),
       ],
       child: const MyApp(),
     ),
@@ -24,16 +23,14 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    //final user = context.read<AuthService>().currentUser();
-    final user = context.watch<AuthService>().currentUser();
+    // 로그인 분기 대신 상세페이지를 홈으로 바로 띄움
     return MaterialApp(
-      theme: ThemeData(fontFamily: 'NanumSquareRound'),
-      home: user == null ? LoginPage() : MainShell(),
       debugShowCheckedModeBanner: false,
+      home: const DetailScreen(),
     );
   }
 }
