@@ -32,6 +32,13 @@ class FavoritesProvider with ChangeNotifier {
     }
     notifyListeners();
   }
+
+  void seedByTitles(Iterable<String> titles, List<FavoriteItem> catalog) {
+    _favorites
+      ..clear()
+      ..addAll(catalog.where((i) => titles.contains(i.title)));
+    notifyListeners();
+  }
 }
 
 class FavoritesPage extends StatelessWidget {
@@ -45,7 +52,7 @@ class FavoritesPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF4A5A73),
         elevation: 0,
-        centerTitle: true, // 제목 가운데 정렬
+        centerTitle: true,
         title: const Text(
           '즐겨찾기',
           style: TextStyle(
@@ -66,16 +73,18 @@ class FavoritesPage extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
+
+            // 비었을 때도 화면이 예쁘게 보이도록 Center 처리
             if (favorites.isEmpty)
-              const SizedBox.shrink()
+              const Expanded(child: Center(child: Text('즐겨찾기한 항목이 없습니다.')))
             else
               Expanded(
-                child: ListView.builder(
+                child: ListView.separated(
                   itemCount: favorites.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final item = favorites[index];
                     return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF5EFE7),
@@ -100,12 +109,15 @@ class FavoritesPage extends StatelessWidget {
                               ],
                             ),
                           ),
+                          // 즐겨찾기 페이지에서는 모두 즐겨찾기 상태이므로 '해제' 아이콘을 표시
                           IconButton(
                             icon: const Icon(Icons.star, color: Colors.blue),
+                            tooltip: '즐겨찾기 해제',
                             onPressed: () {
                               context.read<FavoritesProvider>().toggleFavorite(
                                 item,
                               );
+                              // toggle 후 notify → favorites가 줄어들며 즉시 리스트에서 빠짐
                             },
                           ),
                         ],
