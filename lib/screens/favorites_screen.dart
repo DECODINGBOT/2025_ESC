@@ -1,19 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-class FavoriteItem {
-  final String title;
-  final String period;
-  final String price;
-  final String imageUrl;
-
-  FavoriteItem({
-    required this.title,
-    required this.period,
-    required this.price,
-    required this.imageUrl,
-  });
-}
+import 'package:sharing_items/src/custom/favorite_item.dart';
 
 class FavoritesProvider with ChangeNotifier {
   final List<FavoriteItem> _favorites = [];
