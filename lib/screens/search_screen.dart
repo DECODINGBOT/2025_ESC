@@ -13,7 +13,8 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen>
     with SingleTickerProviderStateMixin {
-  // 카테고리 UI(아이콘/라벨) – 화면에 보여줄 때 사용(선택 패널에 라벨 사용 가능)
+  // 접힌 상태에서 상단 패널(화살표 영역) 높이
+  static const double _collapsedPanelHeight = 50;
 
   final List<Map<String, dynamic>> categories = [
     {"icon": Icons.directions_car, "label": "자동차용품"},
@@ -26,12 +27,10 @@ class _SearchScreenState extends State<SearchScreen>
     {"icon": Icons.category, "label": "기타"},
   ];
 
-  /// 외부에서 controller가 없으면 내부에서 생성해서 사용
   late final TextEditingController _internalController;
   TextEditingController get _controller =>
       widget.searchController ?? _internalController;
 
-  /// 예시 데이터 (실사용에선 API/DB 결과로 대체)
   final List<Map<String, dynamic>> _allItems = [
     {
       "category": "자동차용품",
@@ -61,10 +60,10 @@ class _SearchScreenState extends State<SearchScreen>
 
   late List<Map<String, dynamic>> _results;
 
-  // ---- 추가: 카테고리 패널 상태/애니메이션 & 선택 상태 ----
+  // 카테고리 패널 상태/애니메이션 & 선택 상태
   bool _showCategoryPanel = false;
   late final AnimationController _arrowCtrl;
-  final Set<String> _selectedCategories = {}; // 멀티 선택
+  final Set<String> _selectedCategories = {};
 
   @override
   void initState() {
@@ -73,7 +72,6 @@ class _SearchScreenState extends State<SearchScreen>
     _results = List<Map<String, dynamic>>.from(_allItems);
     _controller.addListener(_applyFilters);
 
-    // 화살표 회전 애니메이션
     _arrowCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
@@ -90,28 +88,23 @@ class _SearchScreenState extends State<SearchScreen>
     super.dispose();
   }
 
-  // 검색어/카테고리 전체 필터 로직
   void _applyFilters() {
     final q = _controller.text.trim().toLowerCase();
-
     setState(() {
       _results = _allItems.where((item) {
         final title = (item['title'] as String).toLowerCase();
         final category = item['category'] as String;
 
-        final matchQuery = q.isEmpty ? true : title.contains(q);
-        final matchCategory = _selectedCategories.isEmpty
-            ? true
-            : _selectedCategories.contains(category);
+        final matchQuery = q.isEmpty || title.contains(q);
+        final matchCategory =
+            _selectedCategories.isEmpty || _selectedCategories.contains(category);
 
         return matchQuery && matchCategory;
       }).toList();
     });
   }
 
-  void _clearSearch() {
-    _controller.clear();
-  }
+  void _clearSearch() => _controller.clear();
 
   void _toggleCategoryPanel() {
     setState(() => _showCategoryPanel = !_showCategoryPanel);
@@ -150,7 +143,7 @@ class _SearchScreenState extends State<SearchScreen>
                   const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+                    children: const [
                       Text(
                         "검색",
                         style: TextStyle(
@@ -159,12 +152,10 @@ class _SearchScreenState extends State<SearchScreen>
                           color: Colors.white,
                         ),
                       ),
-                      Center(
-                        /// 가운데 부분 채우기
-                      ),
+                      // 가운데 채움용
+                      SizedBox.shrink(),
                     ],
                   ),
-
                   const SizedBox(height: 15),
                   // 검색창
                   Container(
@@ -200,41 +191,77 @@ class _SearchScreenState extends State<SearchScreen>
       ),
       body: Stack(
         children: [
-          Column(
-            children: [
-              SizedBox(height: 50,),
-              _buildResultArea(),
-            ],
+          // 리스트(배경). 접힌 헤더 높이만큼 top 여백을 두고 채움.
+          Positioned.fill(
+            top: _collapsedPanelHeight,
+            child: IgnorePointer(
+              ignoring: _showCategoryPanel, // 패널 열리면 리스트 터치 막기
+              child: _resultList(),
+            ),
           ),
+
+          // 상단 카테고리 패널(접혔을 때는 화살표 영역만, 펼치면 그 아래 Grid가 오버레이)
           Positioned(top: 0, left: 0, right: 0, child: _categoryTab()),
         ],
       ),
     );
   }
 
+  // 결과 리스트(Expanded/Column 없이 단일 ListView)
+  Widget _resultList() {
+    if (_results.isEmpty) {
+      return const Center(
+        child: Text("검색 결과가 없어요.", style: TextStyle(fontSize: 16)),
+      );
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.only(top: 0),
+      itemCount: _results.length,
+      itemBuilder: (context, index) {
+        final item = _results[index];
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: ItemInfo(
+            category: item['category'] as String,
+            title: item['title'] as String,
+            location: item['location'] as String,
+            price: item['price'] as int,
+          ),
+        );
+      },
+    );
+  }
+
+  // 상단 카테고리 패널(화살표 + 펼치면 Grid)
   Widget _categoryTab() {
     return Container(
-      color: pointColorWeak,
+      decoration: BoxDecoration(
+        color: pointColorWeak,
+        boxShadow: const [
+          BoxShadow(blurRadius: 6, color: Colors.black12), // 살짝 떠 보이게
+        ],
+      ),
       child: Column(
+        mainAxisSize: MainAxisSize.min, // 내용 높이만 차지
         children: [
-          // 화살표 버튼
-          Align(
-            alignment: Alignment.center,
-            child: IconButton(
-              padding: const EdgeInsets.only(top: 6),
-              tooltip: _showCategoryPanel ? "카테고리 접기" : "카테고리 펼치기",
-              onPressed: _toggleCategoryPanel,
-              icon: RotationTransition(
-                turns: Tween<double>(begin: 0, end: 0.5).animate(_arrowCtrl),
-                child: const Icon(
-                  Icons.keyboard_arrow_down,
-                  color: widgetbackgroundColor,
+          SizedBox(
+            height: _collapsedPanelHeight,
+            child: Center(
+              child: IconButton(
+                tooltip: _showCategoryPanel ? "카테고리 접기" : "카테고리 펼치기",
+                onPressed: _toggleCategoryPanel,
+                icon: RotationTransition(
+                  turns: Tween<double>(begin: 0, end: 0.5).animate(_arrowCtrl),
+                  child: Icon(
+                    Icons.keyboard_arrow_down,
+                    color: widgetbackgroundColor,
+                  ),
                 ),
               ),
             ),
           ),
 
-          // 펼쳐지는 카테고리 패널
+          // 펼쳐지는 카테고리 Grid (오버레이로 리스트 위에 내려옴)
           ClipRect(
             child: AnimatedSize(
               duration: const Duration(milliseconds: 200),
@@ -248,10 +275,11 @@ class _SearchScreenState extends State<SearchScreen>
                         itemCount: categories.length,
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 4,
-                              mainAxisSpacing: 8,
-                              crossAxisSpacing: 8,
-                            ),
+                          crossAxisCount: 4,
+                          childAspectRatio: 1,
+                          mainAxisSpacing: 8,
+                          crossAxisSpacing: 8,
+                        ),
                         itemBuilder: (context, index) {
                           final category = categories[index];
                           final label = category['label'] as String;
@@ -293,50 +321,6 @@ class _SearchScreenState extends State<SearchScreen>
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildResultArea() {
-    if (_results.isEmpty) {
-      return const Center(
-        child: Text("검색 결과가 없어요.", style: TextStyle(fontSize: 16)),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 결과 개수 표시
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-          child: Text(
-            "검색 결과 ${_results.length}개"
-            "${_selectedCategories.isEmpty ? "" : " · 카테고리: ${_selectedCategories.join(", ")}"}",
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
-          ),
-        ),
-        const Divider(height: 1),
-        Expanded(
-          child: ListView.builder(
-            itemCount: _results.length,
-            itemBuilder: (context, index) {
-              final item = _results[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                child: ItemInfo(
-                  category: item['category'] as String,
-                  title: item['title'] as String,
-                  location: item['location'] as String,
-                  price: item['price'] as int,
-                ),
-              );
-            },
-          ),
-        ),
-      ],
     );
   }
 }
