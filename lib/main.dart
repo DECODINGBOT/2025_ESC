@@ -1,12 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sharing_items/screens/category_screen.dart';
+import 'package:sharing_items/main_shell.dart';
+import 'package:sharing_items/screens/favorites_screen.dart';
 import 'package:sharing_items/src/service/auth_service.dart';
 import 'package:sharing_items/src/service/theme_service.dart';
 
 import 'package:sharing_items/screens/login_screen.dart';
-import 'package:sharing_items/screens/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +16,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (context) => AuthService()),
         ChangeNotifierProvider(create: (context) => ThemeService()),
+        ChangeNotifierProvider(create: (context) => FavoritesProvider()),
       ],
       child: const MyApp(),
     ),
@@ -30,18 +31,9 @@ class MyApp extends StatelessWidget {
     //final user = context.read<AuthService>().currentUser();
     final user = context.watch<AuthService>().currentUser();
     return MaterialApp(
-      //theme: ThemeData(fontFamily: 'NanumSquareRound'),
-      home: user == null ? LoginPage() : HomePage(),
+      theme: ThemeData(fontFamily: 'NanumSquareRound'),
+      home: user == null ? LoginPage() : MainShell(),
       debugShowCheckedModeBanner: false,
-
-      routes: {
-        '/login': (_) => LoginPage(),
-        '/home': (_) => HomePage(),
-        '/category': (_) => CategoryScreen(), //search로 바꿀 예정
-        //'/favorites': (_) => ,
-        //'/mypage': (_) => ,
-      },
-
     );
   }
 }

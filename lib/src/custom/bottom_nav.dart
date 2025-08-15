@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
 class CustomBottomNav extends StatelessWidget {
+  final int currentIndex;
 
-  const CustomBottomNav({super.key});
+  const CustomBottomNav({super.key, required this.currentIndex});
 
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      //currentIndex: 0,
+      currentIndex: currentIndex,
       backgroundColor: const Color(0xFFF5EFE7),
       unselectedItemColor: Colors.grey,
       selectedItemColor: const Color(0xFF213555),

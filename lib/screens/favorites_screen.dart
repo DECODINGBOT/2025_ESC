@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sharing_items/screens/home_screen.dart';
 
 class FavoriteItem {
   final String title;
@@ -44,7 +43,7 @@ class FavoritesPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF213555),
+        backgroundColor: const Color(0xFF4A5A73),
         elevation: 0,
         centerTitle: true, // 제목 가운데 정렬
         title: const Text(
@@ -118,7 +117,6 @@ class FavoritesPage extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: CustomBottomNav(currentIndex: 2),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
+import 'package:sharing_items/main_shell.dart';
 import 'package:sharing_items/src/service/auth_service.dart';
 
 /// 로그인 페이지
@@ -120,14 +121,14 @@ class _LoginPageState extends State<LoginPage> {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text("로그인 성공"),
               ));
-              // HomePage로 이동
-              /*
+              // MainShell로 이동
+              
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => HomePage()),
+                MaterialPageRoute(builder: (context) => MainShell()),
               );
-              */
-              Navigator.pushReplacementNamed(context, '/home');
+              
+              //Navigator.pushReplacementNamed(context, '/home');
             },
             onError: (err) {
               // 에러 발생
@@ -213,7 +214,11 @@ class _LoginPageState extends State<LoginPage> {
           ],
         ),
         onPressed: () {
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => MainShell()),
+          );
+          //Navigator.pushReplacementNamed(context, '/home');
         },
       ),
     );
@@ -249,7 +254,11 @@ class _LoginPageState extends State<LoginPage> {
           ],
         ),
         onPressed: () {
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => MainShell()),
+          );
+          //Navigator.pushReplacementNamed(context, '/home');
         },
       ),
     );

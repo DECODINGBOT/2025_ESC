@@ -116,7 +116,7 @@ class _EditMyInfoScreenState extends State<EditMyInfoScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: strong,
+        backgroundColor: const Color(0xFF4A5A73),
         centerTitle: true,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),

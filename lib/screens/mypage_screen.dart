@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:sharing_items/screens/home_screen.dart';
 import 'package:sharing_items/screens/write_screen.dart';
 import 'package:sharing_items/screens/edit_myinfo_screen.dart';
 
@@ -58,7 +57,8 @@ class _MyPageScreenState extends State<MyPageScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: strong,
+        //backgroundColor: strong,
+        backgroundColor: const Color(0xFF4A5A73),
         elevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -136,9 +136,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
           ),
         ),
       ),
-
-      // 하단 네비
-      bottomNavigationBar: const CustomBottomNav(currentIndex: 3),
     );
   }
 

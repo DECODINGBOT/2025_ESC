@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:sharing_items/src/custom/app_bar.dart';
-import 'package:sharing_items/src/custom/bottom_nav.dart';
 
 class CategoryScreen extends StatefulWidget {
   const CategoryScreen({super.key});
@@ -24,7 +23,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: '카테고리'),
+      appBar: CustomAppBar(title: '검색'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -71,8 +70,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
           ],
         ),
       ),
-
-      bottomNavigationBar: CustomBottomNav(),
     );
   }
 }
