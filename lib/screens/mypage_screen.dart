@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'dart:io'; // ✅ 로컬 파일 표시용
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sharing_items/screens/write_screen.dart';
@@ -47,8 +46,10 @@ class _MyPageScreenState extends State<MyPageScreen> {
   DateTime joinDate = DateTime(2025, 8, 14);
   String address = '주소';
 
-  // 임시 데이터: 내가 쓴 글/대여내역
-  final bool hasMyPosts = false;
+  // 내가 쓴 글 (WriteScreen에서 돌아온 내용을 쌓아 보여줌)
+  final List<MyPost> myPosts = [];
+
+  // 임시 데이터: 대여내역
   final List<RentalItem> myRentals = [];
 
   String _dateText(DateTime d) =>
@@ -59,7 +60,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        //backgroundColor: strong,
         backgroundColor: const Color(0xFF4A5A73),
         elevation: 0,
         centerTitle: true,
@@ -118,7 +118,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
               ),
               const SizedBox(height: 8),
               _MyPostsArea(
-                hasPosts: hasMyPosts,
+                posts: myPosts,
                 bodyStyle: _bodyStyle,
                 detailStyle: _detailStyle,
               ),
@@ -162,6 +162,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: () {
+              // ✅ 로컬/네트워크 모두 지원
               if (profileImageUrl == null || profileImageUrl!.isEmpty) {
                 return Container(
                   width: 64,
@@ -174,7 +175,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
                   ),
                 );
               }
-              // 로컬 파일 경로(file://...) 또는 일반 경로 처리
               final url = profileImageUrl!;
               if (url.startsWith('http')) {
                 return Image.network(
@@ -194,7 +194,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
               }
             }(),
           ),
-
           const SizedBox(width: 16),
 
           // 텍스트 정보
@@ -253,10 +252,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
           initialUserId: userId,
           initialJoinDate: joinDate,
           initialAddress: address,
-          // 필요 시 아래도 전달
-          // initialDetailAddress: detailAddress,
-          // initialPhone: phone,
-          // initialAbout: about,
           initialProfileImageUrl: profileImageUrl,
         ),
       ),
@@ -283,11 +278,28 @@ class _MyPageScreenState extends State<MyPageScreen> {
     }
   }
 
-  void _onWriteTapped(BuildContext context) {
-    Navigator.push(
+  Future<void> _onWriteTapped(BuildContext context) async {
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const WriteScreen()),
     );
+
+    if (!mounted) return;
+
+    // WriteScreen에서 Map 형태로 결과를 돌려준다고 가정
+    if (result is Map) {
+      try {
+        final post = MyPost.fromMap(result);
+        setState(() {
+          myPosts.insert(0, post); // 최신 글을 위로
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('글이 등록되었습니다.')));
+      } catch (_) {
+        // 결과 형식이 다를 경우 무시
+      }
+    }
   }
 }
 
@@ -322,18 +334,18 @@ class _SectionHeader extends StatelessWidget {
 
 class _MyPostsArea extends StatelessWidget {
   const _MyPostsArea({
-    required this.hasPosts,
+    required this.posts,
     required this.bodyStyle,
     required this.detailStyle,
   });
 
-  final bool hasPosts;
+  final List<MyPost> posts;
   final TextStyle bodyStyle;
   final TextStyle detailStyle;
 
   @override
   Widget build(BuildContext context) {
-    if (!hasPosts) {
+    if (posts.isEmpty) {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -353,7 +365,6 @@ class _MyPostsArea extends StatelessWidget {
       );
     }
 
-    final items = List.generate(3, (i) => '내 글 제목 ${i + 1}');
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -363,17 +374,23 @@ class _MyPostsArea extends StatelessWidget {
       child: ListView.separated(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        itemCount: items.length,
+        itemCount: posts.length,
         separatorBuilder: (_, __) => const Divider(height: 1),
         itemBuilder: (context, index) {
+          final p = posts[index];
           return ListTile(
-            title: Text(items[index], style: bodyStyle),
-            subtitle: Text('상세 보기', style: detailStyle),
+            title: Text(p.title, style: bodyStyle),
+            subtitle: Text(
+              '등록일 ${p.createdAt.year}.${p.createdAt.month.toString().padLeft(2, '0')}.${p.createdAt.day.toString().padLeft(2, '0')}',
+              style: detailStyle,
+            ),
             trailing: const Icon(
               Icons.chevron_right,
               color: _MyPageScreenState.weak,
             ),
-            onTap: () {},
+            onTap: () {
+              // TODO: 상세 페이지로 이동하고 싶다면 여기 연결
+            },
           );
         },
       ),
@@ -408,19 +425,15 @@ class _RentalTile extends StatelessWidget {
             ),
           ),
         ),
-        title:
-            const SizedBox.shrink() ==
-                null // just to keep const warning away
-            ? null
-            : Text(
-                item.title,
-                style: const TextStyle(
-                  fontFamily: 'NotoSans',
-                  fontSize: 16,
-                  color: _MyPageScreenState.strong,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+        title: Text(
+          item.title,
+          style: const TextStyle(
+            fontFamily: 'NotoSans',
+            fontSize: 16,
+            color: _MyPageScreenState.strong,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -462,4 +475,21 @@ class RentalItem {
     required this.price,
     required this.thumbnail,
   });
+}
+
+// ===== 내가 쓴 글 모델 =====
+class MyPost {
+  final String title;
+  final DateTime createdAt;
+
+  MyPost({required this.title, required this.createdAt});
+
+  factory MyPost.fromMap(Map data) {
+    return MyPost(
+      title: (data['title'] as String?) ?? '제목 없음',
+      createdAt:
+          DateTime.tryParse((data['createdAt'] as String?) ?? '') ??
+          DateTime.now(),
+    );
+  }
 }

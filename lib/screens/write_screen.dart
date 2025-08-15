@@ -174,6 +174,7 @@ class _WriteScreenState extends State<WriteScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
+  // ▼▼▼ 여기서 MyPage로 결과(Map)를 전달 ▼▼▼
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
 
@@ -192,10 +193,24 @@ class _WriteScreenState extends State<WriteScreen> {
     // 예: Firebase Storage 업로드 후 다운로드 URL 수집 -> Firestore/서버에 상품 데이터 저장
     // final urls = await _uploadAllImages(_images);
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('등록 완료! (업로드 로직 연결 필요)')));
-    Navigator.pop(context);
+    // ✅ 작성 결과를 MyPage로 전달
+    Navigator.pop(context, {
+      // MyPage에서 사용할 핵심 값들
+      'title': _titleCtrl.text.trim(),
+      'createdAt': DateTime.now().toIso8601String(),
+
+      // 필요하면 MyPage에서 더 활용할 수 있도록 추가 정보도 함께 전달(있어도 무방)
+      'place': _placeCtrl.text.trim(),
+      'pricePerDay': _priceCtrl.text.trim(),
+      'deposit': _depositCtrl.text.trim(),
+      'desc': _descCtrl.text.trim(),
+      'startDate': _startDate!.toIso8601String(),
+      'endDate': _endDate!.toIso8601String(),
+
+      // 로컬 이미지 경로들(업로드 전이라면 file path, 업로드 후라면 url 리스트 등으로 바꿔 전달)
+      'imagePaths': _images.map((x) => x.path).toList(),
+      // 'imageUrls': urls, // 업로드 후라면 이 키로 전달
+    });
   }
 
   @override
