@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sharing_items/const/Colors.dart';
 import 'package:sharing_items/src/custom/item_info.dart';
 import 'package:sharing_items/src/service/favorites_provider.dart';
 
@@ -12,14 +13,14 @@ class FavoritesPage extends StatelessWidget {
     final liked = fav.liked;
 
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF4A5A73),
+        backgroundColor: pointColorWeak,
         elevation: 0,
         centerTitle: true,
         title: const Text(
           '즐겨찾기',
           style: TextStyle(
-            fontFamily: 'NotoSans',
             fontSize: 28,
             fontWeight: FontWeight.w700,
             color: Colors.white,

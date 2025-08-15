@@ -83,8 +83,7 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   // provider의 전체 데이터에서 현재 조건으로 필터링
-  List<Map<String, dynamic>> _filtered(
-      List<Map<String, dynamic>> allItems) {
+  List<Map<String, dynamic>> _filtered(List<Map<String, dynamic>> allItems) {
     final q = _controller.text.trim().toLowerCase();
     return allItems.where((item) {
       final title = (item['title'] as String).toLowerCase();
@@ -105,31 +104,27 @@ class _SearchScreenState extends State<SearchScreen>
     final results = _filtered(fav.all);
 
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(128),
+        preferredSize: const Size.fromHeight(120),
         child: AppBar(
           backgroundColor: pointColorWeak,
           elevation: 0,
           flexibleSpace: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text(
-                        "검색",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                  Center(
+                    child: Text(
+                      "검색",
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                      SizedBox.shrink(),
-                    ],
+                    ),
                   ),
                   const SizedBox(height: 15),
                   // 검색창
@@ -153,8 +148,7 @@ class _SearchScreenState extends State<SearchScreen>
                               )
                             : null,
                         border: InputBorder.none,
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 8),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 8),
                       ),
                       onSubmitted: (_) => FocusScope.of(context).unfocus(),
                     ),
@@ -184,8 +178,9 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Widget _summaryBar(int count) {
-    final selectedText =
-        _selectedCategories.isEmpty ? "전체" : _selectedCategories.join(", ");
+    final selectedText = _selectedCategories.isEmpty
+        ? "전체"
+        : _selectedCategories.join(", ");
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,7 +198,10 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   // 결과 리스트(요약바 + 아이템들). 즐겨찾기 표시는 Provider 기준.
-  Widget _resultList(List<Map<String, dynamic>> results, FavoritesProvider fav) {
+  Widget _resultList(
+    List<Map<String, dynamic>> results,
+    FavoritesProvider fav,
+  ) {
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(child: _summaryBar(results.length)),
@@ -216,28 +214,27 @@ class _SearchScreenState extends State<SearchScreen>
           )
         else
           SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final m = results[index];
-                final id = m['id'] as String;
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final m = results[index];
+              final id = m['id'] as String;
 
-                return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: ItemInfo(
-                    key: ValueKey(id),
-                    category: m['category'] as String,
-                    title: m['title'] as String,
-                    location: m['location'] as String,
-                    price: m['price'] as int,
-                    isLike: fav.isFavoriteById(id),
-                    onLikeChanged: (_) =>
-                        context.read<FavoritesProvider>().toggleById(id), // 토글
-                  ),
-                );
-              },
-              childCount: results.length,
-            ),
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                child: ItemInfo(
+                  key: ValueKey(id),
+                  category: m['category'] as String,
+                  title: m['title'] as String,
+                  location: m['location'] as String,
+                  price: m['price'] as int,
+                  isLike: fav.isFavoriteById(id),
+                  onLikeChanged: (_) =>
+                      context.read<FavoritesProvider>().toggleById(id), // 토글
+                ),
+              );
+            }, childCount: results.length),
           ),
       ],
     );
@@ -248,9 +245,7 @@ class _SearchScreenState extends State<SearchScreen>
     return Container(
       decoration: BoxDecoration(
         color: pointColorWeak,
-        boxShadow: const [
-          BoxShadow(blurRadius: 6, color: Colors.black12),
-        ],
+        boxShadow: const [BoxShadow(blurRadius: 6, color: Colors.black12)],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -284,16 +279,15 @@ class _SearchScreenState extends State<SearchScreen>
                         itemCount: categories.length,
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 4,
-                          childAspectRatio: 1,
-                          mainAxisSpacing: 8,
-                          crossAxisSpacing: 8,
-                        ),
+                              crossAxisCount: 4,
+                              childAspectRatio: 1,
+                              mainAxisSpacing: 8,
+                              crossAxisSpacing: 8,
+                            ),
                         itemBuilder: (context, index) {
                           final category = categories[index];
                           final label = category['label'] as String;
-                          final selected =
-                              _selectedCategories.contains(label);
+                          final selected = _selectedCategories.contains(label);
 
                           return Card(
                             color: selected
