@@ -2,14 +2,26 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sharing_items/screens/category_screen.dart';
+import 'package:sharing_items/screens/favorites_screen.dart';
+import 'package:sharing_items/screens/write_screen.dart';
 import 'package:sharing_items/src/service/auth_service.dart';
 import 'package:sharing_items/src/service/theme_service.dart';
 
 import 'package:sharing_items/screens/login_screen.dart';
 import 'package:sharing_items/screens/home_screen.dart';
+import 'package:sharing_items/screens/mypage_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => FavoritesProvider()), // ★ 추가
+        ChangeNotifierProvider(create: (_) => AuthService()),
+        ChangeNotifierProvider(create: (_) => ThemeService()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -21,6 +33,15 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(fontFamily: 'NanumSquareRound'),
       home: CategoryScreen(),
       debugShowCheckedModeBanner: false,
+
+      routes: {
+        '/login': (_) => LoginPage(),
+        '/home': (_) => HomePage(),
+        '/category': (_) => CategoryScreen(),
+        '/favorites': (_) => FavoritesPage(),
+        '/mypage': (_) => MyPageScreen(),
+        '/write': (_) => WriteScreen(),
+      },
     );
   }
 }

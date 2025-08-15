@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:sharing_items/screens/home_screen.dart';
 
 class CategoryScreen extends StatefulWidget {
   const CategoryScreen({super.key});
@@ -47,7 +48,10 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 0,
+                  horizontal: 16,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(color: Colors.grey.shade300),
@@ -71,7 +75,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 return Card(
                   color: const Color(0xFFF3F0E8),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                   child: InkWell(
                     onTap: () {
                       // 카테고리 클릭 이벤트
@@ -79,11 +84,17 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(category['icon'], size: 28, color: Colors.blueGrey),
+                        Icon(
+                          category['icon'],
+                          size: 28,
+                          color: Colors.blueGrey,
+                        ),
                         const SizedBox(height: 6),
-                        Text(category['label'],
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 12)),
+                        Text(
+                          category['label'],
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 12),
+                        ),
                       ],
                     ),
                   ),
@@ -91,11 +102,13 @@ class _CategoryScreenState extends State<CategoryScreen> {
               },
             ),
             const SizedBox(height: 24),
+
             // 물건 등록하기 버튼
-            
           ],
         ),
       ),
+
+      bottomNavigationBar: CustomBottomNav(currentIndex: 1),
     );
   }
 }
