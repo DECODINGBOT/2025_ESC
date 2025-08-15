@@ -2,11 +2,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sharing_items/main_shell.dart';
-import 'package:sharing_items/screens/favorites_screen.dart';
-import 'package:sharing_items/src/service/auth_service.dart';
-import 'package:sharing_items/src/service/theme_service.dart';
-
 import 'package:sharing_items/screens/login_screen.dart';
+
+import 'package:sharing_items/src/service/auth_service.dart';
+import 'package:sharing_items/src/service/favorites_provider.dart';
+import 'package:sharing_items/src/service/theme_service.dart';
+import 'package:sharing_items/screens/favorites_screen.dart';
+import 'package:sharing_items/screens/detail_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

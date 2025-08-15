@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sharing_items/const/colors.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -26,7 +27,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: const Color(0xFF4A5A73),
+      backgroundColor: pointColorWeak,
       elevation: 0,
       flexibleSpace: Padding(
         padding: EdgeInsets.only(top: 40, left: 24, right: 24, bottom: 8),

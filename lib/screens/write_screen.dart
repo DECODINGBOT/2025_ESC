@@ -1,16 +1,9 @@
+import 'dart:io'; // NEW
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart'; // NEW
+import 'package:sharing_items/screens/detail_screen.dart'; // 경로 맞게
 
-/// 글쓰기 화면 (상품 등록)
-/// - 사진 업로드(자리만 마련)
-/// - 상품명
-/// - 대여 장소
-/// - 1일 가격
-/// - 상세 설명(멀티라인)
-/// - 대여 가능 기간(시작/종료 날짜)
-/// - 보증금
-///
-/// 팔레트/폰트는 기존 앱 규칙을 따릅니다.
 class WriteScreen extends StatefulWidget {
   const WriteScreen({super.key});
 
@@ -36,10 +29,14 @@ class _WriteScreenState extends State<WriteScreen> {
   DateTime? _startDate;
   DateTime? _endDate;
 
+  // --- NEW: 이미지 관련 상태 ---
+  final ImagePicker _picker = ImagePicker();
+  final List<XFile> _images = []; // 선택된 이미지들
+
   // ---- helpers ----
   InputDecoration _boxInput(String hint) => InputDecoration(
     hintText: hint,
-    hintStyle: const TextStyle(fontFamily: 'NotoSans', color: Colors.black54),
+    hintStyle: const TextStyle(color: Colors.black54),
     filled: true,
     fillColor: const Color(0xFFF5EFE7),
     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
@@ -54,7 +51,6 @@ class _WriteScreenState extends State<WriteScreen> {
     child: Text(
       text,
       style: const TextStyle(
-        fontFamily: 'NotoSans',
         fontSize: 20,
         fontWeight: FontWeight.w600,
         color: Colors.black,
@@ -89,7 +85,6 @@ class _WriteScreenState extends State<WriteScreen> {
     setState(() {
       if (isStart) {
         _startDate = picked;
-        // 시작일이 종료일보다 뒤면 종료일을 비움
         if (_endDate != null && _endDate!.isBefore(_startDate!)) {
           _endDate = null;
         }
@@ -101,24 +96,121 @@ class _WriteScreenState extends State<WriteScreen> {
 
   String _dateText(DateTime? d, String placeholder) =>
       d == null ? placeholder : "${d.year}.${_two(d.month)}.${_two(d.day)}";
-
   String _two(int n) => n.toString().padLeft(2, '0');
 
+  // --- NEW: 이미지 픽커 동작 ---
+  Future<void> _showPickSheet() async {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text('갤러리에서 선택'),
+              onTap: () async {
+                Navigator.pop(context);
+                await _pickFromGallery();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt_outlined),
+              title: const Text('카메라로 촬영'),
+              onTap: () async {
+                Navigator.pop(context);
+                await _pickFromCamera();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickFromGallery() async {
+    try {
+      final files = await _picker.pickMultiImage(
+        imageQuality: 85, // 용량 절약
+        maxWidth: 1600,
+        maxHeight: 1600,
+      );
+      if (files.isEmpty) return;
+      setState(() {
+        _images.addAll(files);
+      });
+    } on PlatformException catch (e) {
+      _showError('갤러리에서 이미지를 불러오지 못했어요: ${e.message}');
+    }
+  }
+
+  Future<void> _pickFromCamera() async {
+    try {
+      final file = await _picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 85,
+        maxWidth: 1600,
+        maxHeight: 1600,
+      );
+      if (file == null) return;
+      setState(() {
+        _images.add(file);
+      });
+    } on PlatformException catch (e) {
+      _showError('카메라를 사용할 수 없어요: ${e.message}');
+    }
+  }
+
+  void _removeImageAt(int index) {
+    setState(() {
+      _images.removeAt(index);
+    });
+  }
+
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  // ▼▼▼ 여기서 MyPage로 결과(Map)를 전달 ▼▼▼
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
 
+    // --- NEW: 최소 1장 검증 ---
+    if (_images.isEmpty) {
+      _showError('최소 1장 이상의 사진을 등록해 주세요.');
+      return;
+    }
+
     if (_startDate == null || _endDate == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('대여 가능 기간을 선택해 주세요.')));
+      _showError('대여 가능 기간을 선택해 주세요.');
       return;
     }
 
     // TODO: 업로드 로직(이미지/데이터 전송) 연결
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('등록 완료! (업로드 로직 연결 필요)')));
-    Navigator.pop(context);
+    // 예: Firebase Storage 업로드 후 다운로드 URL 수집 -> Firestore/서버에 상품 데이터 저장
+    // final urls = await _uploadAllImages(_images);
+
+    // ✅ 작성 결과를 MyPage로 전달
+    Navigator.pop(context, {
+      // MyPage에서 사용할 핵심 값들
+      'title': _titleCtrl.text.trim(),
+      'createdAt': DateTime.now().toIso8601String(),
+
+      // 필요하면 MyPage에서 더 활용할 수 있도록 추가 정보도 함께 전달(있어도 무방)
+      'place': _placeCtrl.text.trim(),
+      'pricePerDay': _priceCtrl.text.trim(),
+      'deposit': _depositCtrl.text.trim(),
+      'desc': _descCtrl.text.trim(),
+      'startDate': _startDate!.toIso8601String(),
+      'endDate': _endDate!.toIso8601String(),
+
+      // 로컬 이미지 경로들(업로드 전이라면 file path, 업로드 후라면 url 리스트 등으로 바꿔 전달)
+      'imagePaths': _images.map((x) => x.path).toList(),
+      // 'imageUrls': urls, // 업로드 후라면 이 키로 전달
+    });
   }
 
   @override
@@ -129,7 +221,6 @@ class _WriteScreenState extends State<WriteScreen> {
     _depositCtrl.dispose();
     _descCtrl.dispose();
     super.dispose();
-    // ignore: dead_code
   }
 
   @override
@@ -140,13 +231,10 @@ class _WriteScreenState extends State<WriteScreen> {
         backgroundColor: const Color(0xFF4A5A73),
         centerTitle: true,
         elevation: 0,
-        iconTheme: const IconThemeData(
-          color: Colors.white, // 화살표 색상을 흰색으로 설정
-        ),
+        iconTheme: const IconThemeData(color: Colors.white),
         title: const Text(
           '글쓰기',
           style: TextStyle(
-            fontFamily: 'NotoSans',
             fontSize: 28,
             fontWeight: FontWeight.w700,
             color: Colors.white,
@@ -161,42 +249,84 @@ class _WriteScreenState extends State<WriteScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 사진 업로드 자리
-                Row(
+                // --- NEW: 사진 업로드 영역 (미리보기 + 추가/삭제) ---
+                Text(
+                  '사진',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        // TODO: image_picker 연동 (카메라/갤러리)
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('사진 업로드는 추후 연결됩니다.')),
-                        );
-                      },
+                    // 선택된 이미지 썸네일들
+                    ..._images.asMap().entries.map((entry) {
+                      final i = entry.key;
+                      final file = entry.value;
+                      return Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.file(
+                              File(file.path),
+                              width: 92,
+                              height: 92,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Positioned(
+                            top: -6,
+                            right: -6,
+                            child: GestureDetector(
+                              onTap: () => _removeImageAt(i),
+                              child: Container(
+                                width: 24,
+                                height: 24,
+                                decoration: const BoxDecoration(
+                                  color: Colors.black87,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.close,
+                                  size: 16,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
+                    // 추가 버튼(갤러리/카메라 선택 바텀시트)
+                    InkWell(
+                      onTap: _showPickSheet,
+                      borderRadius: BorderRadius.circular(10),
                       child: Container(
                         width: 92,
                         height: 92,
                         decoration: BoxDecoration(
                           color: const Color(0xFFF5EFE7),
                           borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: weak.withOpacity(0.25)),
                         ),
                         child: const Icon(
-                          Icons.photo_camera_outlined,
-                          size: 36,
+                          Icons.add_a_photo_outlined,
+                          size: 28,
                           color: Colors.black87,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    const Expanded(
-                      child: Text(
-                        '최소 1장 이상의 사진을 등록해 주세요.',
-                        style: TextStyle(
-                          fontFamily: 'NotoSans',
-                          fontSize: 12,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ),
                   ],
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  '최소 1장 이상의 사진을 등록해 주세요.',
+                  style: TextStyle(fontSize: 12, color: Colors.black54),
                 ),
 
                 // 상품명
@@ -274,10 +404,7 @@ class _WriteScreenState extends State<WriteScreen> {
                               const SizedBox(width: 8),
                               Text(
                                 _dateText(_startDate, '시작일 선택'),
-                                style: const TextStyle(
-                                  fontFamily: 'NotoSans',
-                                  color: Colors.black87,
-                                ),
+                                style: const TextStyle(color: Colors.black87),
                               ),
                             ],
                           ),
@@ -313,10 +440,7 @@ class _WriteScreenState extends State<WriteScreen> {
                               const SizedBox(width: 8),
                               Text(
                                 _dateText(_endDate, '종료일 선택'),
-                                style: const TextStyle(
-                                  fontFamily: 'NotoSans',
-                                  color: Colors.black87,
-                                ),
+                                style: const TextStyle(color: Colors.black87),
                               ),
                             ],
                           ),
@@ -337,7 +461,6 @@ class _WriteScreenState extends State<WriteScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       textStyle: const TextStyle(
-                        fontFamily: 'NotoSans',
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),

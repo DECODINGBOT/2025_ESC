@@ -1,42 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sharing_items/src/custom/favorite_item.dart';
-
-class FavoritesProvider with ChangeNotifier {
-  final List<FavoriteItem> _favorites = [];
-
-  List<FavoriteItem> get favorites => _favorites;
-
-  bool isFavorite(FavoriteItem item) {
-    return _favorites.any((fav) => fav.title == item.title);
-  }
-
-  void toggleFavorite(FavoriteItem item) {
-    if (isFavorite(item)) {
-      _favorites.removeWhere((fav) => fav.title == item.title);
-    } else {
-      _favorites.add(item);
-    }
-    notifyListeners();
-  }
-}
+import 'package:sharing_items/const/Colors.dart';
+import 'package:sharing_items/src/custom/item_info.dart';
+import 'package:sharing_items/src/service/favorites_provider.dart';
 
 class FavoritesPage extends StatelessWidget {
   const FavoritesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final favorites = context.watch<FavoritesProvider>().favorites;
+    final fav = context.watch<FavoritesProvider>();
+    final liked = fav.liked;
 
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF4A5A73),
+        backgroundColor: pointColorWeak,
         elevation: 0,
-        centerTitle: true, // 제목 가운데 정렬
+        centerTitle: true,
         title: const Text(
           '즐겨찾기',
           style: TextStyle(
-            fontFamily: 'NotoSans',
             fontSize: 28,
             fontWeight: FontWeight.w700,
             color: Colors.white,
@@ -45,64 +29,29 @@ class FavoritesPage extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "즐겨찾기 내역",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            if (favorites.isEmpty)
-              const SizedBox.shrink()
-            else
-              Expanded(
-                child: ListView.builder(
-                  itemCount: favorites.length,
-                  itemBuilder: (context, index) {
-                    final item = favorites[index];
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF5EFE7),
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: Row(
-                        children: [
-                          Image.network(item.imageUrl, width: 60, height: 60),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item.title,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(item.period),
-                                Text(item.price),
-                              ],
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.star, color: Colors.blue),
-                            onPressed: () {
-                              context.read<FavoritesProvider>().toggleFavorite(
-                                item,
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+        child: liked.isEmpty
+            ? const Center(child: Text('즐겨찾기한 항목이 없습니다.'))
+            : ListView.separated(
+                itemCount: liked.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final m = liked[index];
+                  final id = m['id'] as String;
+
+                  return ItemInfo(
+                    key: ValueKey(id),
+                    category: m['category'] as String,
+                    title: m['title'] as String,
+                    location: m['location'] as String,
+                    price: m['price'] as int,
+                    isLike: fav.isFavoriteById(id),
+                    onLikeChanged: (_) {
+                      // mockItems의 isLike 토글 + 모든 화면에 반영
+                      context.read<FavoritesProvider>().toggleById(id);
+                    },
+                  );
+                },
               ),
-          ],
-        ),
       ),
     );
   }

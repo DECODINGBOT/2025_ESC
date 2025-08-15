@@ -22,7 +22,7 @@ class _MainShellState extends State<MainShell> {
 
   final _pages = const [
     HomePage(),
-    CategoryScreen(),
+    SearchScreen(),
     FavoritesPage(),
     MyPageScreen(),
   ];
